@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout.html}">
+<head>
+<meta charset="UTF-8">
+<title>Search Category (Paginated)</title>
+</head>
+<body>
+	<section class="row" layout:fragment="content">
+		<div class="col-md-12">
+			<div class="card">
+				<div
+					class="card-header d-flex justify-content-between
+				align-items-center">
+					<span>List Category</span>
+					<!-- Form tìm kiếm -->
+					<form class="d-flex"
+						th:action="@{/admin/categories/searchpaginated}" method="get">
+						<input class="form-control me-2" type="search" name="name"
+							placeholder="Search category..." th:value="${name}">
+						<button class="btn btn-outline-success" type="submit">Search</button>
+					</form>
+				</div>
+				<div class="card-header">List Category</div>
+				<div class="card-body">
+
+					<!-- Thông báo nếu không có dữ liệu -->
+					<div class="row" th:if="${!categoryPage.hasContent()}">
+						<div class="col">
+							<div class="alert alert-danger" role="alert">No Category
+								Found</div>
+						</div>
+					</div>
+
+					<!-- Bảng danh sách -->
+					<table th:if="${categoryPage.hasContent()}"
+						class="table table-striped table-inverse table-responsive">
+						<thead class="thead-inverse">
+							<tr>
+								<th>Category ID</th>
+								<th>Category Name</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="category, stat : ${categoryPage.content}">
+								<td scope="row">[[${category.categoryId}]]</td>
+								<td th:text="${category.name}"></td>
+								<td><a
+									th:href="@{'/admin/categories/view/' + ${category.categoryId}}"
+									class="btn btn-outline-info"><i class="fa fa-info"></i></a> <a
+									th:href="@{'/admin/categories/edit/' + ${category.categoryId}}"
+									class="btn btn-outline-warning"><i class="fa fa-edit"></i></a>
+									<a href="#" class="btn btn-outline-danger"
+									th:data-id="${category.categoryId}"
+									th:data-name="${category.name}"
+									onclick="showConfirmation(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+										<i class="fa fa-trash"></i>
+								</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Footer: chọn size + phân trang -->
+				<div class="card-footer text-muted">
+					<div class="row">
+						<!-- Chọn số bản ghi/trang -->
+						<div class="col-3">
+							<form method="get"
+								th:action="@{/admin/categories/searchpaginated}"
+								class="form-inline">
+								<div class="input-group float-left">
+									<label for="size" class="mr-2">Page size</label> <select
+										class="form-select" id="size" name="size" aria-label="Size"
+										onchange="this.form.submit()">
+										<option th:selected="${categoryPage.size == 5}" value="5">5</option>
+										<option th:selected="${categoryPage.size == 10}" value="10">10</option>
+										<option th:selected="${categoryPage.size == 15}" value="15">15</option>
+										<option th:selected="${categoryPage.size == 20}" value="20">20</option>
+									</select> <input type="hidden" name="name" th:value="${name}" />
+								</div>
+							</form>
+						</div>
+
+						<!-- Phân trang First - số trang - Last -->
+						<div class="col-9 d-flex justify-content-center">
+							<nav aria-label="Page navigation"
+								th:if="${categoryPage.totalPages > 0}">
+								<ul class="pagination">
+									<!-- First -->
+									<li class="page-item"
+										th:classappend="${categoryPage.first}? 'disabled'"><a
+										class="page-link"
+										th:href="@{|/admin/categories/searchpaginated?name=${name}&size=${categoryPage.size}&page=0|}">
+											First </a></li>
+
+									<!-- Số trang -->
+									<li class="page-item"
+										th:each="pageNumber : ${#numbers.sequence(0, categoryPage.totalPages-1)}"
+										th:classappend="${pageNumber == categoryPage.number} ? ' active'">
+										<a class="page-link"
+										th:href="@{|/admin/categories/searchpaginated?name=${name}&size=${categoryPage.size}&page=${pageNumber}|}">
+											[[${pageNumber+1}]] </a>
+									</li>
+
+									<!-- Last -->
+									<li class="page-item"
+										th:classappend="${categoryPage.last}? 'disabled'"><a
+										class="page-link"
+										th:href="@{|/admin/categories/searchpaginated?name=${name}&size=${categoryPage.size}&page=${categoryPage.totalPages-1}|}">
+											Last </a></li>
+								</ul>
+							</nav>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Script xác nhận xoá -->
+	<script type="text/javascript">
+		function showConfirmation(id, name) {
+			$("#productName").text(name);
+			$("#confirmation").attr("href", '/admin/categories/delete/' + id);
+			$("#confirmationModal").modal('show');
+		}
+	</script>
+
+	<!-- Modal xác nhận -->
+	<div class="modal fade" id="confirmationModal" tabindex="-1"
+		aria-labelledby="confirmationLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="confirmationLabel">Confirmation</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					Bạn có chắc muốn xoá <span id="productName"></span>?
+				</div>
+				<div class="modal-footer">
+					<a id="confirmation" class="btn btn-primary">Yes</a>
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

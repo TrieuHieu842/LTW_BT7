@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="nav">
+    <nav style="background:#f8f9fa;padding:10px;">
+        <a th:href="@{/admin/categories/list}">Danh sách Category</a> |
+        <a th:href="@{/admin/categories/add}">Thêm Category</a>
+    </nav>
+</div>
+</body>
+</html>
