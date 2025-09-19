@@ -114,19 +114,21 @@ public class CategoryController {
     // ====== Search with pagination ======
     @RequestMapping("searchpaginated")
     public String searchPaginated(ModelMap model,
-                                  @RequestParam(name = "name", required = false) String name,
-                                  @RequestParam("page") Optional<Integer> page,
-                                  @RequestParam("size") Optional<Integer> size) {
+        @RequestParam(name = "name", required = false, defaultValue = "") String name,
+        @RequestParam("page") Optional<Integer> page,
+        @RequestParam("size") Optional<Integer> size) {
 
-        int currentPage = page.orElse(0); // 0-based
+        int currentPage = page.orElse(0);
         int pageSize = size.orElse(5);
 
         Pageable pageable = PageRequest.of(currentPage, pageSize, Sort.by("name"));
         Page<CategoryEntity> resultPage;
 
         if (StringUtils.hasText(name)) {
+            // có search
             resultPage = categoryService.findByNameContaining(name, pageable);
         } else {
+            // không search -> hiển thị toàn bộ
             resultPage = categoryService.findAll(pageable);
         }
 
@@ -134,19 +136,18 @@ public class CategoryController {
         if (totalPages > 0) {
             int start = Math.max(0, currentPage - 2);
             int end = Math.min(currentPage + 2, totalPages - 1);
-
             List<Integer> pageNumbers = IntStream.rangeClosed(start, end)
-                    .boxed()
-                    .collect(Collectors.toList());
+                    .boxed().collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
 
         model.addAttribute("categoryPage", resultPage);
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
-        model.addAttribute("name", name); // luôn add, kể cả khi null/empty
+        model.addAttribute("name", name); // giữ lại name để gõ xong search vẫn còn
 
         return "admin/categories/searchpaginated";
     }
+
 
 }
